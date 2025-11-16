@@ -1,0 +1,36 @@
+
+BRUTE FORCE: 
+    Speed: 0.013258182004094124
+    Num Results: 4410
+
+NO LEC/TUT OVERLAP: 
+    Speed: 0.002491760009434074
+    Num Results: 375
+
+NO LEC/TUT AND NO NON COMPATIBLE OVERLAP:
+    Speed: 0.0007158950029406697
+    Num Results: 19
+
+    Top 20 memory allocations:
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:160: size=9448 B, count=89, average=106 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:110: size=7576 B, count=102, average=74 B
+    <frozen abc>:123: size=1006 B, count=10, average=101 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:141: size=208 B, count=1, average=208 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:139: size=208 B, count=1, average=208 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:101: size=208 B, count=1, average=208 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:156: size=192 B, count=1, average=192 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/main.py:17: size=24 B, count=1, average=24 B
+
+NO LEC/TUT AND NO NON COMPATIBLE OVERLAP AND NO UNWANTED TIMES:
+    Speed: 0.0005447010044008493
+    Num Results: 10
+
+    Top 20 memory allocations:
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:166: size=4904 B, count=46, average=107 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:116: size=4576 B, count=52, average=88 B
+    <frozen abc>:123: size=1006 B, count=10, average=101 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:145: size=208 B, count=1, average=208 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:107: size=208 B, count=1, average=208 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/and_tree.py:162: size=128 B, count=1, average=128 B
+    /home/nisha/workspace/school/cpsc433/project/src/project/main.py:17: size=24 B, count=1, average=24 B
+    speed: 0.0005447010044008493
