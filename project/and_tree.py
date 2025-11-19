@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Union
 from project.models import LecTut, Lecture, LectureSlot, TutorialSlot, LecTutSlot, is_tut, is_lec
@@ -38,19 +39,14 @@ class AndTreeSearch:
 
     def __init__(self, input_data: InputData) -> None:
         self._input_data = input_data
-        self._unassigned_lecs = self._input_data.lectures.copy()
-        self._unassigned_tuts = self._input_data.tutorials.copy()
 
-        # CHANGE THESE TO A MIN HEAP STRUCUTE FOR EVAL IN THE FUTURE?
         self._open_lecture_slots = {item.identifier: item for item in self._input_data.lec_slots}
         self._open_tut_slots = {item.identifier: item for item in self._input_data.tut_slots}
 
-        self._500_lectures = {item.identifier: item for item in self._input_data.lectures if True}
-        self._500_tutorials = {item.identifier: item for item in self._input_data.lectures if True}
-        self._evening_lectures = {item.identifier: item for item in self._input_data.lectures if True}
-        self._evening_tutorials = {item.identifier: item for item in self._input_data.lectures if True}
-        self._remaining_lectures = {item.identifier: item for item in self._input_data.lectures if item.identifier not in self._500_lectures}
-        self._remaining_tutorials = {}
+        self._5XX_lectures = OrderedDict({item.identifier: item for item in self._input_data.lectures if item.level == 5})
+        self._evening_lectures = OrderedDict({item.identifier: item for item in self._input_data.lectures if item.is_evening})
+        self._other_lectures = OrderedDict({item.identifier: item for item in self._input_data.lectures if item.identifier not in self._5XX_lectures and item.identifier not in self._evening_lectures})
+        self._tutorials = OrderedDict({item.identifier: item for item in self._input_data.tutorials})
 
         self._successors: Dict[str, LecTut] = {}
 
@@ -108,6 +104,13 @@ class AndTreeSearch:
         # Handle AL limit
         if next_lt.alrequired and next_slot.current_alt_cap >= next_slot.alt_max:
             return True
+        
+        # Handle 5XX TIME OVERLAPS
+        if is_lec(next_lt) and next_lt.level == 5:
+            for sched_item in self._curr_schedule.values():
+                if is_lec(sched_item.lt) and sched_item.lt.level == 5 and sched_item.slot.day == next_slot.day and sched_item.slot.start_time == next_slot.start_time:
+                    return True
+
 
         # Handle tutorial and lecture TIME OVERLAPS
         if is_tut(next_lt) and next_lt.parent_lecture_id in curr_sched:
@@ -140,32 +143,57 @@ class AndTreeSearch:
     
 
     def _get_expansions(self, leaf: Node) -> List[ScheduledItem]:
+        """
+        Expansion ordering
+
+        If most recent assignment is a lecture:
+            - Assign its tutorial
+        If most recent assignment is a tutorial:
+            - Assign its next related tutorial if available (Ex CPSC LEC 01 TUT 03 if TUT 02 was just assigned)
         
-        # F Trans picking the schedule 
+        If the immediate priority is unavailable^:
+        - Assign in this priority:
+            - A 5XX Lecture
+            - An Evening Lecture
+            - Other lecture
+            - Other tutorial
+        """
+
+        chosen_lectut = None
+
         if (ident := leaf.most_recent_item.lt.identifier) in self._successors:
-            next_lectut = self._successors[ident]
-        else:
-            if self._unassigned_lecs:
-                next_lectut = self._unassigned_lecs.pop()
-            elif self._unassigned_tuts:
-                next_lectut = self._unassigned_tuts.pop()
+            chosen_lectut = self._successors[ident]
+        elif is_lec((lec := leaf.most_recent_item.lt)):
+            for t_id, tut in self._tutorials.items():
+                if tut.parent_lecture_id == lec.identifier:
+                    chosen_lectut = self._tutorials.pop(t_id)
+                    break
+        elif is_tut((most_recent_tut := leaf.most_recent_item.lt)):
+            for t_id, tut in self._tutorials.items():
+                if tut.parent_lecture_id == most_recent_tut.parent_lecture_id:
+                    chosen_lectut = self._tutorials.pop(t_id)
+                    break
+
+        if not chosen_lectut:
+            for lt_bucket in (self._5XX_lectures, self._evening_lectures, self._other_lectures, self._tutorials):
+                if lt_bucket:
+                    _, chosen_lectut = lt_bucket.popitem(last=False)
+                    break
             else:
                 return []
-            self._successors[leaf.most_recent_item.lt.identifier] = next_lectut
-        
-        if is_lec(next_lectut):
-            open_slots = self._open_lecture_slots
-        else:
-            open_slots = self._open_tut_slots
+
+        self._successors[leaf.most_recent_item.lt.identifier] = chosen_lectut
+
+        open_slots = self._open_lecture_slots if is_lec(chosen_lectut) else self._open_tut_slots
         
         expansions = []
         for _, os in open_slots.items():
-            if self._fail_hc(self._curr_schedule, next_lectut, os):
+            if self._fail_hc(self._curr_schedule, chosen_lectut, os):
                 continue
-            next_b_score = self._calc_bounding_score_contrib(next_lectut, os)
+            next_b_score = self._calc_bounding_score_contrib(chosen_lectut, os)
             if next_b_score + self._curr_bounding_score > self._min_eval:
                 continue
-            expansions.append(ScheduledItem(next_lectut, os, os.current_cap, next_b_score))
+            expansions.append(ScheduledItem(chosen_lectut, os, os.current_cap, next_b_score))
         return expansions
 
     def _pre_process(self) -> Node:
@@ -233,4 +261,5 @@ class AndTreeSearch:
 
 
         return self._results, self.ans
+    
 
