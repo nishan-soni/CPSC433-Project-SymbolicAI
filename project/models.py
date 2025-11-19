@@ -36,44 +36,35 @@ class BaseSlot(CSVParsable):
     current_cap: int = field(default=0, init=False)
     current_alt_cap: int = field(default=0, init=False)
 
-    def increment_current_cap(self):
-        self.current_cap += 1
-
-    def decrement_current_cap(self):
-        self.current_cap -= 1
-
-    def increment_current_alt_cap(self):
-        self.current_alt_cap += 1
-
-    def decrement_current_alt_cap(self):
-        self.current_alt_cap -= 1
-
     def __post_init__(self) -> None:
         self.start_time, self.end_time, =_calc_start_end_times(self.time, self.day, self.identifier_suffix)
         self.identifier = f"{self.day}{self.time}{self.identifier_suffix}"
 
 @dataclass(slots=True)
 class LectureSlot(BaseSlot):
-
-    def __post_init__(self) -> None:
-        self.identifier_suffix = "LEC"
-        BaseSlot.__post_init__(self)
+    identifier_suffix = "LEC"
 
 @dataclass(slots=True)
 class TutorialSlot(BaseSlot):
-    def __post_init__(self) -> None:
-        self.identifier_suffix = "TUT"
-        BaseSlot.__post_init__(self)
+    identifier_suffix = "TUT"
 
 @dataclass(slots=True)
 class LecTut(CSVParsable):
     identifier: str
     alrequired: bool
+    level: int = field(default=0, init=False)
+    is_evening: bool = field(default=False, init=False)
+    
+    def __post_init__(self) -> None:
+        id_split = self.identifier.split(" ")
+        self.level = int(id_split[1][0])
+        self.is_evening = self.level == 9
 
 @dataclass(slots=True)
 class Lecture(LecTut):
     lecture_id: str = field(default="", init=False)
     def __post_init__(self) -> None:
+        LecTut.__post_init__(self)
         id_split = self.identifier.split(" ")
         self.lecture_id = " ".join(id_split[:2])
 
@@ -81,12 +72,12 @@ class Lecture(LecTut):
 class Tutorial(LecTut):
     parent_lecture_id: str = field(default="", init=False)
     def __post_init__(self) -> None:
+        LecTut.__post_init__(self)
         id_split = self.identifier.split(" ")
         if "LEC" in self.identifier:
             self.parent_lecture_id = " ".join(id_split[:4])
         else:
             self.parent_lecture_id = " ".join(id_split[:2] + ["LEC 01"])
-
 
 
 @dataclass(frozen=True, slots=True)

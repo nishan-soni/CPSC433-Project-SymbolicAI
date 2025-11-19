@@ -13,7 +13,7 @@ class ScheduledItem:
 
 @dataclass
 class DummyLecTut(LecTut):
-    identifier: str = "Dummy"
+    identifier: str = "DMM 123 LEC 01"
     alrequired: bool = False
 
 @dataclass(frozen=True)
@@ -44,6 +44,13 @@ class AndTreeSearch:
         # CHANGE THESE TO A MIN HEAP STRUCUTE FOR EVAL IN THE FUTURE?
         self._open_lecture_slots = {item.identifier: item for item in self._input_data.lec_slots}
         self._open_tut_slots = {item.identifier: item for item in self._input_data.tut_slots}
+
+        self._500_lectures = {item.identifier: item for item in self._input_data.lectures if True}
+        self._500_tutorials = {item.identifier: item for item in self._input_data.lectures if True}
+        self._evening_lectures = {item.identifier: item for item in self._input_data.lectures if True}
+        self._evening_tutorials = {item.identifier: item for item in self._input_data.lectures if True}
+        self._remaining_lectures = {item.identifier: item for item in self._input_data.lectures if item.identifier not in self._500_lectures}
+        self._remaining_tutorials = {}
 
         self._successors: Dict[str, LecTut] = {}
 
@@ -134,7 +141,7 @@ class AndTreeSearch:
 
     def _get_expansions(self, leaf: Node) -> List[ScheduledItem]:
         
-        # THIS IS BASICALLY THE F_TRANS PICKING WHAT TO SCHEDULE NEXT
+        # F Trans picking the schedule 
         if (ident := leaf.most_recent_item.lt.identifier) in self._successors:
             next_lectut = self._successors[ident]
         else:
@@ -209,7 +216,9 @@ class AndTreeSearch:
             self._post_dfs_updates(next_item)
 
     def get_formatted_answer(self) -> List[str]:
-        assert self.ans
+        if not self.ans:
+            return []
+
         res = []
         for _, node in self.ans.items():
             res.append(f"{node.lt.identifier}, {node.slot.day}, {node.slot.time}")
