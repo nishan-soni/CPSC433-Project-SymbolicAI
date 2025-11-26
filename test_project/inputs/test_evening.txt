@@ -5,4 +5,5 @@ F, 18:00, 2, 0,  0
 
 
 Lectures:
-CPSC 231 LEC 9, false
+CPSC 231 LEC 91, false
+CPSC 331 LEC 09, false

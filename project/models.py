@@ -58,7 +58,7 @@ class LecTut(CSVParsable):
     def __post_init__(self) -> None:
         id_split = self.identifier.split(" ")
         self.level = int(id_split[1][0])
-        self.is_evening = id_split[3] == "9"
+        self.is_evening = id_split[3].startswith("9")
 
 @dataclass(slots=True)
 class Lecture(LecTut):
