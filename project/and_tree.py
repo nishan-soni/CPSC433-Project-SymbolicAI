@@ -149,6 +149,7 @@ class AndTreeSearch:
         b_score = pref_pen + pair_pen + section_pen # final calculated score
         return b_score
     
+
     # Computes total estimated score = current penalty + min future penalty
     def _get_eval_score(self):
         """This can most likely be optimized"""
@@ -352,7 +353,7 @@ class AndTreeSearch:
         self._5XX_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.level == LEVEL_5XX})
         self._evening_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.is_evening})
         self._other_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.identifier not in self._5XX_lectures and item.identifier not in self._evening_lectures})
-    
+
 
     # Update slot usages before recursion
     def _pre_dfs_slot_update(self, sched_item: ScheduledItem) -> None:
