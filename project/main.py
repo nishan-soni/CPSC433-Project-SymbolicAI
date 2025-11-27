@@ -10,7 +10,7 @@ def main():
     # for slot in input_data.lec_slots:
     #     slot.current_cap += 1
 
-    search = AndTreeSearch(input_data)
+    search = AndTreeSearch(input_data, break_limit=20000)
 
     tracemalloc.start()
     start = perf_counter()
@@ -34,7 +34,8 @@ def main():
     #     print(" ")
 
     print(" ")
-    print(ans)
+    print(search.get_formatted_answer())
+    print("min eval", search._min_eval)
 
 if __name__ == "__main__":
     main()

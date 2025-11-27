@@ -85,23 +85,6 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
     """Get all the inputted data and raise exceptions on invalid inputs"""
     parsed_file = _parse_file(path)
 
-    id_map: Dict[str, LecTut] = {}
-    # for lec in parsed_file.lectures:
-    #     id_map[lec.identifier] = lec
-    #     print(lec.identifier, lec)
-    # for tut in parsed_file.tutorials:
-    #     id_map[tut.identifier] = tut
-    #     print(tut.identifier, tut)
-
-    for slot in parsed_file.lec_slots:
-        print(slot)
-
-    print(" ")
-
-    for lt in parsed_file.lectures:
-        print(lt)
-
-
 
     pair: Dict[str, str] = {}
     for pr in parsed_file.pair:

@@ -71,7 +71,7 @@ def _get_formatted_schedule(sched: Mapping[str, ScheduledItem]) -> str:
 
 class AndTreeSearch:
 
-    def __init__(self, input_data: InputData) -> None:
+    def __init__(self, input_data: InputData, break_limit: Optional[int] = None) -> None:
         self._input_data = input_data
 
         self._open_lecture_slots = {item.identifier: item for item in self._input_data.lec_slots}
@@ -91,8 +91,9 @@ class AndTreeSearch:
 
         self.ans: Optional[Dict[str, ScheduledItem]] = None
 
+        self._break_limit = break_limit
+
         self._init_schedule()
-        print(input_data.not_compatible)
 
     
     def _calc_bounding_score_contrib(self, next_lt: LecTut, next_slot: LecTutSlot) -> float:
@@ -237,7 +238,7 @@ class AndTreeSearch:
             if next_b_score + self._curr_bounding_score > self._min_eval:
                 continue
             expansions.append(ScheduledItem(chosen_lectut, os, os.current_cap, next_b_score))
-        return expansions
+        return sorted(expansions, key= lambda x: x.b_score_contribution)
 
     def _init_schedule(self):
         # remove Tuesday @ 11-12:30 from slots
@@ -326,18 +327,21 @@ class AndTreeSearch:
         self._curr_bounding_score -= scheduled_item.b_score_contribution
 
     def _dfs(self, current_leaf: Node):
-
+        if self._break_limit and len(self._results) >= self._break_limit:
+            return
+        
         expansions = self._get_expansions(current_leaf)
 
         if not expansions:
             self.num_leafs += 1 # for observability
             if len(self._curr_schedule) == len(self._input_data.lectures) + len(self._input_data.tutorials):
-                self._results.append(self._curr_schedule.copy())
+                res = self._curr_schedule.copy()
+                self._results.append(res)
                 if (ev := self._get_eval_score()) < self._min_eval:
-                    self.ans = self._curr_schedule.copy()
+                    self.ans = res
                     self._min_eval = ev
             return
-
+        
         for next_item in expansions:
             new_leaf = Node(most_recent_item=next_item)
             self._pre_dfs_updates(next_item)
@@ -354,7 +358,6 @@ class AndTreeSearch:
 
         root = Node(DummyScheduledItem())
         self._dfs(root)
-
 
         return self._results, self.ans
     
