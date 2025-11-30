@@ -4,6 +4,16 @@ TU, 13:00, 2, 0,0
 F, 18:00, 2, 0,  0
 
 
+Tutorial slots:
+MO, 13:00, 2, 0,0
+TU, 13:00, 2, 0,0
+F, 21:00, 2, 0,  0
+
+
 Lectures:
 CPSC 231 LEC 91, false
 CPSC 331 LEC 09, false
+
+Tutorials:
+CPSC 231 LEC 91 TUT 90, false
+

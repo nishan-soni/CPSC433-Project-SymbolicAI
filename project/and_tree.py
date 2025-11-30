@@ -139,6 +139,10 @@ class AndTreeSearch:
     
     def _fail_hc(self, curr_sched: Dict[str, ScheduledItem], next_lt: LecTut, next_slot: LecTutSlot) -> bool:
 
+        # Handle evening constraint
+        if next_lt.is_evening and next_slot.start_time < EVENING_TIME:
+            return True
+
         # Handle cap limit
         if next_slot.current_cap >= next_slot.max_cap:
             return True
@@ -230,8 +234,6 @@ class AndTreeSearch:
         
         expansions = []
         for _, os in open_slots.items():
-            if chosen_lectut.is_evening and os.start_time < EVENING_TIME:
-                continue
             if self._fail_hc(self._curr_schedule, chosen_lectut, os):
                 continue
             next_b_score = self._calc_bounding_score_contrib(chosen_lectut, os)
