@@ -256,11 +256,12 @@ class AndTreeSearch:
         # partial assignments
 
         # Assign 851 and 913 to TU 18:00 if they exist  
-        special_time_slot = LectureSlot("TU", "18:00", 2, 0, 0)   
-        special_time_slot.end_time = 19
-        for key, lec in self._all_lectures.items():
+        special_time_slot = TutorialSlot("TU", "18:00", 0, 0, 0)   
+        for _, lec in self._all_lectures.items():
             if lec.lecture_id in ("CPSC 851", "CPSC 913"):
                 initial_schedule[lec.identifier] = ScheduledItem(lec, special_time_slot, 0, 0)
+                special_time_slot.current_cap += 1
+                special_time_slot.max_cap += 1
         
         # the rest of the partial assignments
         for lt_id, p_assign in self._input_data.part_assign.items():
