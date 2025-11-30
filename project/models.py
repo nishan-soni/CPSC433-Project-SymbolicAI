@@ -124,6 +124,10 @@ class PartialAssignment(CSVParsable):
     day: str
     time: str
 
+@dataclass
+class Name(CSVParsable):
+    name: str
+
 LecTutSlot = Union[LectureSlot, TutorialSlot]
 
 

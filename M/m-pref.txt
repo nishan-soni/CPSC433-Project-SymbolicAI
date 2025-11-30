@@ -1,0 +1,20 @@
+Lecture slots:
+MO, 8:00, 5, 0, 0
+
+Tutorial slots:
+
+Lectures:
+CPSC 233 LEC 01,false
+
+Tutorials:
+
+Not compatible:
+
+Unwanted:
+
+Preferences:
+MO, 8:00, CPSC 233 LEC 01, 10 
+
+Pair:
+
+Partial assignments:

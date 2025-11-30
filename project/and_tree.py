@@ -35,7 +35,7 @@ EVENING_TIME = 18
 LEVEL_5XX = 5
 
 def _overlap(start1: float, end1: float, start2: float, end2: float) -> bool:
-    return not ((end1 < start2) or (end2 < start1))
+    return not ((end1 <= start2) or (end2 <= start1))
 
 def _get_formatted_schedule(sched: Mapping[str, ScheduledItem]) -> str:
     """Order lectures alphabetically, and put tutorials under their lecture"""

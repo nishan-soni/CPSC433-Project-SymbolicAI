@@ -1,10 +1,10 @@
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, Optional
 import logging
 
-from project.models import LectureSlot, TutorialSlot, Tutorial, Lecture, NotCompatible, Unwanted, Preference, Pair, PartialAssignment, LecTut
+from project.models import LectureSlot, Name, TutorialSlot, Tutorial, Lecture, NotCompatible, Unwanted, Preference, Pair, PartialAssignment, LecTut
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class InputData:
 
 @dataclass
 class ParsedFile:
-    name: str = ""
+    name: List[Name] = field(default_factory=list)
     lec_slots: List[LectureSlot] = field(default_factory=list)
     tut_slots: List[TutorialSlot] = field(default_factory=list)
     tutorials: List[Tutorial] = field(default_factory=list)
@@ -50,6 +50,7 @@ headers = {
     "Preferences:": ("preferences", Preference),
     "Pair:": ("pair", Pair),
     "Partial assignments:": ("part_assign", PartialAssignment),
+    "Name:": ("name", Name),
 }
 
 def _parse_file(path: str | Path):
@@ -63,8 +64,6 @@ def _parse_file(path: str | Path):
             line = raw.strip()
             if not line:
                 continue
-            logger.info(line)
-
             if line in headers:
                 header_name = line
 
@@ -102,7 +101,7 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
         part_assign[pa.identifier] = pa
 
     return InputData(
-        name=parsed_file.name,
+        name=parsed_file.name[0].name,
         lec_slots=parsed_file.lec_slots,
         tut_slots=parsed_file.tut_slots,
         tutorials=parsed_file.tutorials,
