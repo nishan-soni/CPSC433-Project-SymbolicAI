@@ -34,6 +34,7 @@ def main():
     #     print(" ")
 
     print(" ")
+    print(search._get_eval_score())
     print(search.get_formatted_answer())
     print("min eval", search._min_eval)
 
