@@ -1,0 +1,8 @@
+Lecture slots:
+M0, 9:00, 2, 0, 0
+TU, 11:00, 2, 0,0
+F, 11:00, 2, 1,0
+
+
+Lectures:
+CPSC 231 LEC 01, false
