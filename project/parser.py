@@ -19,7 +19,7 @@ class InputData:
     not_compatible: List[NotCompatible]
     unwanted: Dict[str, List[Unwanted]]
     preferences: Dict[str, List[Preference]]
-    pair: Dict[str, str]
+    pair: List[Pair]
     part_assign: Dict[str, PartialAssignment]
     pen_lec_min: int
     pen_tut_min: int
@@ -85,12 +85,6 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
     """Get all the inputted data and raise exceptions on invalid inputs"""
     parsed_file = _parse_file(path)
 
-
-    pair: Dict[str, str] = {}
-    for pr in parsed_file.pair:
-        pair[pr.id1] = pr.id2
-        pair[pr.id2] = pr.id1
-
     unwanted: Dict[str, List[Unwanted]] = defaultdict(list)
 
     for uw in parsed_file.unwanted:
@@ -116,7 +110,7 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
         not_compatible=parsed_file.not_compatible,
         unwanted=unwanted,
         preferences=preferences,
-        pair=pair,
+        pair=parsed_file.pair,
         part_assign=part_assign,
         pen_lec_min=int(pen_lec_min)*int(w_min_filled),
         pen_not_paired=int(pen_not_paired)*int(w_pair),

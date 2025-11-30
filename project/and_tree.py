@@ -104,25 +104,20 @@ class AndTreeSearch:
             for pref in self._input_data.preferences[ident]:
                 if pref.day != next_slot.day or pref.start_time != next_slot.start_time:
                     pref_pen += pref.pref_val
-    
-        # Pair penality
-        pair_pen = 0
-        if (ident := next_lt.identifier) in self._input_data.pair and (pair_id := self._input_data.pair[ident]) in self._curr_schedule and (self._curr_schedule[pair_id].slot.day != next_slot.day or self._curr_schedule[pair_id].slot.start_time != next_slot.start_time):
-            pair_pen = self._input_data.pen_not_paired
-        
+            
         # Section penalty
 
         section_pen = 0
         if not is_lec(next_lt):
-            return pref_pen + pair_pen
+            return pref_pen
 
         for _, item in self._curr_schedule.items():
             if not is_lec(item.lt):
                 continue
             if next_lt.lecture_id == item.lt.lecture_id and next_slot.day == item.slot.day and next_slot.start_time == item.slot.start_time:
-                section_pen = self._input_data.pen_section
+                section_pen += self._input_data.pen_section
 
-        b_score = pref_pen + pair_pen + section_pen
+        b_score = pref_pen + section_pen
         return b_score
     
     def _get_eval_score(self):
@@ -137,7 +132,15 @@ class AndTreeSearch:
         for slot in self._open_tut_slots.values():
             tut_min_pen += max(slot.min_cap - slot.current_cap, 0) * self._input_data.pen_tut_min
 
-        return self._curr_bounding_score + lec_min_pen + tut_min_pen
+        pair_pen = 0
+        # Pair penality
+        for pair in self._input_data.pair:
+            item_1 = self._curr_schedule[pair.id1]
+            item_2 = self._curr_schedule[pair.id2]
+            if item_1.slot.day != item_2.slot.day and item_1.slot.time != item_2.slot.time:
+                pair_pen += self._input_data.pen_not_paired
+
+        return self._curr_bounding_score + lec_min_pen + tut_min_pen + pair_pen
     
     def _fail_hc(self, curr_sched: Dict[str, ScheduledItem], next_lt: LecTut, next_slot: LecTutSlot) -> bool:
 
