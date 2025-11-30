@@ -157,7 +157,7 @@ class AndTreeSearch:
         # Handle tutorial and lecture TIME OVERLAPS
         if is_tut(next_lt) and next_lt.parent_lecture_id in curr_sched:
             sched_lecture = curr_sched[next_lt.parent_lecture_id]
-            if sched_lecture.slot.day == sched_lecture.slot.day and _overlap(sched_lecture.slot.start_time, sched_lecture.slot.end_time, next_slot.start_time, next_slot.end_time):
+            if sched_lecture.slot.day == next_slot.day and _overlap(sched_lecture.slot.start_time, sched_lecture.slot.end_time, next_slot.start_time, next_slot.end_time):
                 return True
 
         # Handle not compatible TIME OVERLAPS
