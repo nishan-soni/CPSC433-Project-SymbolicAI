@@ -2,7 +2,7 @@ from __future__ import annotations
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, List, Mapping, Optional, Sequence, Union
-from project.models import LecTut, Lecture, LectureSlot, NotCompatible, TutorialSlot, LecTutSlot, is_tut, is_lec
+from project.models import LecTut, Lecture, LectureSlot, NotCompatible, PartialAssignment, Tutorial, TutorialSlot, LecTutSlot, is_tut, is_lec
 from project.parser import InputData
 
 @dataclass(frozen=True, slots=True)
@@ -236,7 +236,6 @@ class AndTreeSearch:
         self._successors[leaf.most_recent_item.lt.identifier] = chosen_lectut
 
         open_slots = self._open_lecture_slots if is_lec(chosen_lectut) else self._open_tut_slots
-        
         expansions = []
         for _, os in open_slots.items():
             if self._fail_hc(self._curr_schedule, chosen_lectut, os):
@@ -258,15 +257,26 @@ class AndTreeSearch:
 
         # partial assignments
 
-        # Assign 851 and 913 to TU 18:00 if they exist  
-        special_time_slot = TutorialSlot("TU", "18:00", 0, 0, 0)   
+        # Add partial assignments for 851 TUT and 913 TUT to TU 18:00 if 351 or 413 exist 
+        id_851 = "CPSC 851 TUT 01"
+        id_913 = "CPSC 913 TUT 01"
+
         for _, lec in self._all_lectures.items():
-            if lec.lecture_id in ("CPSC 851", "CPSC 913"):
-                initial_schedule[lec.identifier] = ScheduledItem(lec, special_time_slot, 0, 0)
-                special_time_slot.current_cap += 1
-                special_time_slot.max_cap += 1
-        
-        # the rest of the partial assignments
+            if lec.lecture_id == "CPSC 351":
+                self._tutorials[id_851] = Tutorial(id_851, False)
+                self._input_data.part_assign[id_851] = PartialAssignment(id_851, "TU", "18:00")
+                for lt in self._input_data.lectures + self._input_data.tutorials:
+                    if is_lec(lt) and lt.lecture_id == "CPSC 351" or is_tut(lt) and lt.parent_lecture_id == "CPSC 351":
+                        self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_851))
+
+            if lec.lecture_id == "CPSC 413":
+                self._tutorials[id_913] = Tutorial(id_913, False)
+                self._input_data.part_assign[id_913] = PartialAssignment(id_913, "TU", "18:00")
+                for lt in self._input_data.lectures + self._input_data.tutorials:
+                    if is_lec(lt) and lt.lecture_id == "CPSC 351" or is_tut(lt) and lt.parent_lecture_id == "CPSC 351":
+                        self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_851))
+
+        # Assign the partial assignments
         for lt_id, p_assign in self._input_data.part_assign.items():
             if lt_id in self._tutorials:
                 lt = self._tutorials[lt_id]
@@ -279,6 +289,9 @@ class AndTreeSearch:
             open_slots = self._open_lecture_slots if is_lec(lt) else self._open_tut_slots
             for slot in open_slots.values():
                 if slot.day == p_assign.day and slot.time == p_assign.time:
+                    if self._fail_hc(initial_schedule, lt, slot):
+                        raise Exception("Partial Assignments failed hard constraints.")
+                    slot.current_cap += 1
                     b_score = self._calc_bounding_score_contrib(lt, slot)
                     self._curr_bounding_score += b_score
                     initial_schedule[lt_id] = ScheduledItem(lt, slot, slot.current_cap, b_score)
@@ -288,22 +301,6 @@ class AndTreeSearch:
                 raise Exception(f"The slot for partial assignment {lt_id} {p_assign.day} {p_assign.time} does not exist.")
         
         self._curr_schedule = initial_schedule
-        
-        # Add incompatible statements with all CPSC 331 + 851 and CPSC 413 + CPSC 913
-        for id_351, lt_351 in (self._all_lectures | self._tutorials).items():
-            if is_lec(lt_351) and lt_351.lecture_id != "CPSC 351" or is_tut(lt_351) and "CPSC 351" not in lt_351.parent_lecture_id: 
-                continue
-            for id_851, lt_851 in (self._all_lectures | self._tutorials).items():
-                if is_lec(lt_851) and lt_851.lecture_id != "CPSC 851" or is_tut(lt_851) and "CPSC 851" not in lt_851.parent_lecture_id: 
-                    continue
-                self._input_data.not_compatible.append(NotCompatible(id_351, id_851))
-        for id_413, lt_413 in (self._all_lectures | self._tutorials).items():
-            if is_lec(lt_413) and lt_413.lecture_id != "CPSC 413" or is_tut(lt_413) and "CPSC 413" not in lt_413.parent_lecture_id:
-                continue
-            for id_913, lt_913 in (self._all_lectures | self._tutorials).items():
-                if is_lec(lt_913) and lt_913.lecture_id != "CPSC 913" or is_tut(lt_913) and "CPSC 913" not in lt_913.parent_lecture_id:
-                    continue
-                self._input_data.not_compatible.append(NotCompatible(id_413, id_913))
 
         self._5XX_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.level == LEVEL_5XX})
         self._evening_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.is_evening})
@@ -342,7 +339,8 @@ class AndTreeSearch:
 
         if not expansions:
             self.num_leafs += 1 # for observability
-            if len(self._curr_schedule) == len(self._input_data.lectures) + len(self._input_data.tutorials):
+            # >= to account for the creation of 851/913
+            if len(self._curr_schedule) >= len(self._input_data.lectures) + len(self._input_data.tutorials):
                 res = self._curr_schedule.copy()
                 self._results.append(res)
                 if (ev := self._get_eval_score()) < self._min_eval:
@@ -358,7 +356,7 @@ class AndTreeSearch:
 
     def get_formatted_answer(self) -> str:
         if not self.ans:
-            return ""
+            return "No valid schedule!"
         return _get_formatted_schedule(self.ans)
 
     def get_formatted_answer_with_eval(self) -> str:

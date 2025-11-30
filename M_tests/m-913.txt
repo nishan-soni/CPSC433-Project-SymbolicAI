@@ -1,0 +1,23 @@
+Lecture slots:
+MO, 8:00, 5, 0, 3
+
+Tutorial slots:
+TU, 18:00, 5, 0, 3
+
+Lectures:
+CPSC 413 LEC 01,false
+
+
+Tutorials:
+
+
+Not compatible:
+
+
+Unwanted:
+
+Preferences:
+
+Pair:
+
+Partial assignments:

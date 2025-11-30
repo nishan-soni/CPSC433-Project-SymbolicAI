@@ -101,7 +101,7 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
         part_assign[pa.identifier] = pa
 
     return InputData(
-        name=parsed_file.name[0].name,
+        name="",
         lec_slots=parsed_file.lec_slots,
         tut_slots=parsed_file.tut_slots,
         tutorials=parsed_file.tutorials,
