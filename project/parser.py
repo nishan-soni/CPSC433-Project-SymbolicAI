@@ -18,7 +18,7 @@ class InputData:
     lectures: List[Lecture]
     not_compatible: List[NotCompatible]
     unwanted: Dict[str, List[Unwanted]]
-    preferences: Dict[str, Preference]
+    preferences: Dict[str, List[Preference]]
     pair: Dict[str, str]
     part_assign: Dict[str, PartialAssignment]
     pen_lec_min: int
@@ -96,11 +96,11 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
     for uw in parsed_file.unwanted:
         unwanted[uw.identifier].append(uw)
 
-    preferences: Dict[str, Preference] = {}
+    preferences: Dict[str, List[Preference]] = defaultdict(list)
 
     for pref in parsed_file.preferences:
         pref.pref_val *= int(w_pref)
-        preferences[pref.identifier] = pref
+        preferences[pref.identifier].append(pref)
 
     part_assign: Dict[str, PartialAssignment] = {}
 

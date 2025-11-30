@@ -1,0 +1,4 @@
+Eval-value: 1
+CPSC 231 LEC 91          : F, 18:00
+CPSC 231 LEC 91 TUT 90   : F, 21:00
+CPSC 331 LEC 09          : MO, 13:00

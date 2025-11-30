@@ -15,3 +15,4 @@ CPSC 231 LEC 01 TUT 01,false
 
 Preferences:
 TU, 13:00, CPSC 231 LEC 02, 10
+MO, 8:00, CPSC 231 LEC 02, 4

@@ -100,8 +100,10 @@ class AndTreeSearch:
         # Preference penalty
         pref_pen = 0
         
-        if (ident := next_lt.identifier) in self._input_data.preferences and (self._input_data.preferences[ident].day != next_slot.day or self._input_data.preferences[ident].start_time != next_slot.start_time):
-            pref_pen = self._input_data.preferences[ident].pref_val
+        if (ident := next_lt.identifier) in self._input_data.preferences:
+            for pref in self._input_data.preferences[ident]:
+                if pref.day != next_slot.day or pref.start_time != next_slot.start_time:
+                    pref_pen += pref.pref_val
     
         # Pair penality
         pair_pen = 0
@@ -355,6 +357,8 @@ class AndTreeSearch:
             return ""
         return _get_formatted_schedule(self.ans)
 
+    def get_formatted_answer_with_eval(self) -> str:
+        return f"Eval-value: {self._min_eval}\n{self.get_formatted_answer()}"
 
     def search(self):
 

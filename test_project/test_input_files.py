@@ -25,4 +25,7 @@ def test_input_files(input_path: Path):
 
     expected = expected_path.read_text()
 
-    assert search.get_formatted_answer() == expected
+    if "Eval-value" in expected:
+        assert search.get_formatted_answer_with_eval() == expected
+    else:
+        assert search.get_formatted_answer() == expected
