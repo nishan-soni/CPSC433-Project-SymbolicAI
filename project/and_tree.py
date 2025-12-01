@@ -113,6 +113,9 @@ class AndTreeSearch:
         self._unique_depths = set()
 
         self._init_schedule()
+
+        assert self._NUM_LEC == len(self._5XX_lectures) + len(self._al_required_lectures) + len(self._other_lectures) + len(self._evening_lectures)
+        assert self._NUM_TUT >= len(self._tutorials)
         
 
     
@@ -246,7 +249,7 @@ class AndTreeSearch:
                     break
 
         if not chosen_lectut:
-            for lt_bucket in (self._evening_lectures, self._5XX_lectures, self._tutorials, self._other_lectures):
+            for lt_bucket in (self._al_required_lectures, self._evening_lectures, self._5XX_lectures, self._tutorials, self._other_lectures):
                 if lt_bucket:
                     _, chosen_lectut = lt_bucket.popitem(last=False)
                     break
@@ -324,9 +327,10 @@ class AndTreeSearch:
         
         self._curr_schedule = initial_schedule
 
-        self._5XX_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.level == LEVEL_5XX})
-        self._evening_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.is_evening})
-        self._other_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.identifier not in self._5XX_lectures and item.identifier not in self._evening_lectures})
+        self._al_required_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.alrequired})
+        self._5XX_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.level == LEVEL_5XX and item.identifier not in self._al_required_lectures})
+        self._evening_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.is_evening and item.identifier not in self._5XX_lectures and item.identifier not in self._al_required_lectures})
+        self._other_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.identifier not in self._5XX_lectures and item.identifier not in self._evening_lectures and item.identifier not in self._al_required_lectures})
     
     def _pre_dfs_slot_update(self, sched_item: ScheduledItem) -> None:
         slot = sched_item.slot
