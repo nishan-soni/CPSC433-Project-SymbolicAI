@@ -1,0 +1,3 @@
+Eval-value: 16
+DATA 201 LEC 01   : TU, 9:30
+DATA 201 LAB 01   : MO, 13:00

@@ -76,7 +76,8 @@ class Tutorial(LecTut):
         id_split = self.identifier.split(" ")
         if "LEC" in self.identifier:
             self.parent_lecture_id = " ".join(id_split[:4])
-            self.is_evening = id_split[5].startswith("9")
+            # Either check LEC 9 or TUT 9
+            self.is_evening = id_split[5].startswith("9") or id_split[3].startswith("9")
         else:
             self.parent_lecture_id = " ".join(id_split[:2] + ["LEC 01"])
             self.is_evening = id_split[3].startswith("9")

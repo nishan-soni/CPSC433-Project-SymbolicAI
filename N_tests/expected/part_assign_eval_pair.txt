@@ -1,0 +1,4 @@
+Eval-value: 17
+CPSC 331 LEC 01   : MO, 8:00
+DATA 201 LEC 01   : TU, 9:30
+DATA 201 LAB 01   : MO, 13:00
