@@ -3,7 +3,7 @@ CPSC 231 LEC 01          : MO, 9:00
 CPSC 231 LEC 01 TUT 01   : TU, 10:00
 CPSC 231 LEC 02          : TU, 9:30
 CPSC 231 LEC 02 TUT 02   : MO, 8:00
-CPSC 513 LEC 01          : MO, 8:00
+CPSC 513 LEC 01          : MO, 9:00
 CPSC 513 LEC 01 TUT 01   : TU, 12:00
 SENG 511 LEC 01          : TU, 9:30
 SENG 511 TUT 01          : MO, 8:00

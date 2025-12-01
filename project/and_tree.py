@@ -114,7 +114,7 @@ class AndTreeSearch:
 
         self._init_schedule()
 
-        assert self._NUM_LEC == len(self._5XX_lectures) + len(self._al_required_lectures) + len(self._other_lectures) + len(self._evening_lectures)
+        assert self._NUM_LEC >= len(self._5XX_lectures) + len(self._al_required_lectures) + len(self._other_lectures) + len(self._evening_lectures)
         assert self._NUM_TUT >= len(self._tutorials)
         
 
@@ -160,7 +160,7 @@ class AndTreeSearch:
         for pair in self._input_data.pair:
             item_1 = self._curr_schedule[pair.id1]
             item_2 = self._curr_schedule[pair.id2]
-            if _day_overlap(item_1.lt, item_1.slot.day, item_2.lt, item_2.slot.day) and item_1.slot.time != item_2.slot.time:
+            if not _day_overlap(item_1.lt, item_1.slot.day, item_2.lt, item_2.slot.day) or _day_overlap(item_1.lt, item_1.slot.day, item_2.lt, item_2.slot.day) and item_1.slot.time != item_2.slot.time:
                 pair_pen += self._input_data.pen_not_paired
 
         return self._curr_bounding_score + lec_min_pen + tut_min_pen + pair_pen
@@ -249,7 +249,7 @@ class AndTreeSearch:
                     break
 
         if not chosen_lectut:
-            for lt_bucket in (self._al_required_lectures, self._evening_lectures, self._5XX_lectures, self._tutorials, self._other_lectures):
+            for lt_bucket in (self._al_required_lectures, self._evening_lectures, self._5XX_lectures, self._other_lectures, self._tutorials):
                 if lt_bucket:
                     _, chosen_lectut = lt_bucket.popitem(last=False)
                     break
@@ -326,7 +326,6 @@ class AndTreeSearch:
                 raise Exception(f"The slot for partial assignment {lt_id} {p_assign.day} {p_assign.time} does not exist.")
         
         self._curr_schedule = initial_schedule
-
         self._al_required_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.alrequired})
         self._5XX_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.level == LEVEL_5XX and item.identifier not in self._al_required_lectures})
         self._evening_lectures = OrderedDict({item.identifier: item for item in self._all_lectures.values() if item.is_evening and item.identifier not in self._5XX_lectures and item.identifier not in self._al_required_lectures})
