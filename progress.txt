@@ -1,3 +1,0 @@
-Problem Specific HC
-Proper F Trans
-Soft Constraints
