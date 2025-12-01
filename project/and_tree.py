@@ -5,7 +5,6 @@ import sys
 from typing import Dict, List, Mapping, Optional, Sequence, Union
 from project.models import LecTut, Lecture, LectureSlot, NotCompatible, PartialAssignment, Tutorial, TutorialSlot, LecTutSlot, is_tut, is_lec
 from project.parser import InputData
-import tqdm
 
 @dataclass(frozen=True, slots=True)
 class ScheduledItem:
@@ -191,6 +190,15 @@ class AndTreeSearch:
             sched_lecture = curr_sched[next_lt.parent_lecture_id]
             if _day_overlap(sched_lecture.lt, sched_lecture.slot.day, next_lt, next_slot.day) and _overlap(sched_lecture.slot.start_time, sched_lecture.slot.end_time, next_slot.start_time, next_slot.end_time):
                 return True
+        
+        if is_lec(next_lt):
+            for sched_tut in curr_sched.values():
+                if is_tut(sched_tut.lt) and sched_tut.lt.parent_lecture_id == next_lt.identifier:
+                    if _day_overlap(sched_tut.lt, sched_tut.slot.day, next_lt, next_slot.day) and _overlap(sched_tut.slot.start_time, sched_tut.slot.end_time, next_slot.start_time, next_slot.end_time):
+                        return True
+
+
+
 
         # Handle not compatible TIME OVERLAPS
         for non_c in self._input_data.not_compatible:
@@ -249,7 +257,7 @@ class AndTreeSearch:
                     break
 
         if not chosen_lectut:
-            for lt_bucket in (self._al_required_lectures, self._evening_lectures, self._5XX_lectures, self._other_lectures, self._tutorials):
+            for lt_bucket in (self._al_required_lectures,self._5XX_lectures, self._evening_lectures, self._tutorials, self._other_lectures):
                 if lt_bucket:
                     _, chosen_lectut = lt_bucket.popitem(last=False)
                     break
