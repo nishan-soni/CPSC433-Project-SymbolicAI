@@ -114,7 +114,7 @@ class AndTreeSearch:
         for _, item in self._curr_schedule.items():
             if not is_lec(item.lt):
                 continue
-            if next_lt.lecture_id == item.lt.lecture_id and next_slot.day == item.slot.day and next_slot.start_time == item.slot.start_time:
+            if next_lt.course_id == item.lt.course_id and next_slot.day == item.slot.day and next_slot.start_time == item.slot.start_time:
                 section_pen += self._input_data.pen_section
 
         b_score = pref_pen + section_pen
@@ -262,19 +262,19 @@ class AndTreeSearch:
         id_913 = "CPSC 913 TUT 01"
 
         for _, lec in self._all_lectures.items():
-            if lec.lecture_id == "CPSC 351":
+            if lec.course_id == "CPSC 351":
                 self._tutorials[id_851] = Tutorial(id_851, False)
                 self._input_data.part_assign[id_851] = PartialAssignment(id_851, "TU", "18:00")
                 for lt in self._input_data.lectures + self._input_data.tutorials:
-                    if is_lec(lt) and lt.lecture_id == "CPSC 351" or is_tut(lt) and lt.parent_lecture_id == "CPSC 351":
+                    if lt.course_id == "CPSC 351":
                         self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_851))
 
-            if lec.lecture_id == "CPSC 413":
+            if lec.course_id == "CPSC 413":
                 self._tutorials[id_913] = Tutorial(id_913, False)
                 self._input_data.part_assign[id_913] = PartialAssignment(id_913, "TU", "18:00")
                 for lt in self._input_data.lectures + self._input_data.tutorials:
-                    if is_lec(lt) and lt.lecture_id == "CPSC 351" or is_tut(lt) and lt.parent_lecture_id == "CPSC 351":
-                        self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_851))
+                    if lt.course_id == "CPSC 413":
+                        self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_913))
 
         # Assign the partial assignments
         for lt_id, p_assign in self._input_data.part_assign.items():

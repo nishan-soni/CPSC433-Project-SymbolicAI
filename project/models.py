@@ -54,18 +54,18 @@ class LecTut(CSVParsable):
     alrequired: bool
     level: int = field(default=0, init=False)
     is_evening: bool = field(default=False, init=False)
+    course_id: str = field(default="", init=False)
     
     def __post_init__(self) -> None:
         id_split = self.identifier.split(" ")
         self.level = int(id_split[1][0])
+        self.course_id = " ".join(id_split[:2])
 
 @dataclass(slots=True)
 class Lecture(LecTut):
-    lecture_id: str = field(default="", init=False)
     def __post_init__(self) -> None:
         LecTut.__post_init__(self)
         id_split = self.identifier.split(" ")
-        self.lecture_id = " ".join(id_split[:2])
         self.is_evening = id_split[3].startswith("9")
 
 @dataclass(slots=True)
