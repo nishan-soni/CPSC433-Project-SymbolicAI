@@ -34,6 +34,13 @@ class Node:
 EVENING_TIME = 18
 LEVEL_5XX = 5
 
+def _day_overlap(day1: str, day2: str) -> bool:
+    if day1 == day2:
+        return True
+    if day1 in ("MO", "FR") and day2 in ("MO", "FR"):
+        return True
+    return False
+
 def _overlap(start1: float, end1: float, start2: float, end2: float) -> bool:
     return not ((end1 <= start2) or (end2 <= start1))
 
@@ -114,7 +121,7 @@ class AndTreeSearch:
         for _, item in self._curr_schedule.items():
             if not is_lec(item.lt):
                 continue
-            if next_lt.course_id == item.lt.course_id and next_slot.day == item.slot.day and next_slot.start_time == item.slot.start_time:
+            if next_lt.course_id == item.lt.course_id and _day_overlap(next_slot.day, item.slot.day) and next_slot.start_time == item.slot.start_time:
                 section_pen += self._input_data.pen_section
 
         b_score = pref_pen + section_pen
@@ -159,14 +166,14 @@ class AndTreeSearch:
         # Handle 5XX TIME OVERLAPS
         if is_lec(next_lt) and next_lt.level == LEVEL_5XX:
             for sched_item in self._curr_schedule.values():
-                if is_lec(sched_item.lt) and sched_item.lt.level == LEVEL_5XX and sched_item.slot.day == next_slot.day and _overlap(sched_item.slot.start_time, sched_item.slot.end_time, next_slot.start_time, next_slot.end_time):
+                if is_lec(sched_item.lt) and sched_item.lt.level == LEVEL_5XX and _day_overlap(sched_item.slot.day, next_slot.day) and _overlap(sched_item.slot.start_time, sched_item.slot.end_time, next_slot.start_time, next_slot.end_time):
                     return True
 
 
         # Handle tutorial and lecture TIME OVERLAPS
         if is_tut(next_lt) and next_lt.parent_lecture_id in curr_sched:
             sched_lecture = curr_sched[next_lt.parent_lecture_id]
-            if sched_lecture.slot.day == next_slot.day and _overlap(sched_lecture.slot.start_time, sched_lecture.slot.end_time, next_slot.start_time, next_slot.end_time):
+            if _day_overlap(sched_lecture.slot.day, next_slot.day) and _overlap(sched_lecture.slot.start_time, sched_lecture.slot.end_time, next_slot.start_time, next_slot.end_time):
                 return True
 
         # Handle not compatible TIME OVERLAPS
@@ -180,7 +187,7 @@ class AndTreeSearch:
                 sched_item = curr_sched[id2]
             else:
                 continue
-            if sched_item.slot.day == next_slot.day and _overlap(sched_item.slot.start_time, sched_item.slot.end_time, next_slot.start_time, next_slot.end_time):
+            if _day_overlap(sched_item.slot.day, next_slot.day) and _overlap(sched_item.slot.start_time, sched_item.slot.end_time, next_slot.start_time, next_slot.end_time):
                 return True
 
         # Handle unwanted SLOT ASSIGNMENTS
