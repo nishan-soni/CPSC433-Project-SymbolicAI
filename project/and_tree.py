@@ -1,9 +1,11 @@
 from __future__ import annotations
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
+import sys
 from typing import Dict, List, Mapping, Optional, Sequence, Union
 from project.models import LecTut, Lecture, LectureSlot, NotCompatible, PartialAssignment, Tutorial, TutorialSlot, LecTutSlot, is_tut, is_lec
 from project.parser import InputData
+import tqdm
 
 @dataclass(frozen=True, slots=True)
 class ScheduledItem:
@@ -86,8 +88,8 @@ class AndTreeSearch:
     def __init__(self, input_data: InputData, break_limit: Optional[int] = None) -> None:
         self._input_data = input_data
 
-        self._NUM_TUT = len(self._input_data.lectures)
-        self._NUM_LEC = len(self._input_data.tutorials)
+        self._NUM_LEC = len(self._input_data.lectures)
+        self._NUM_TUT = len(self._input_data.tutorials)
 
         self._open_lecture_slots = {item.identifier: item for item in self._input_data.lec_slots}
         self._open_tut_slots = {item.identifier: item for item in self._input_data.tut_slots}
@@ -100,15 +102,18 @@ class AndTreeSearch:
 
         self._min_eval = float('inf')
 
-        self._results = []
-
         self.num_leafs = 0 # for observability
 
         self.ans: Optional[Dict[str, ScheduledItem]] = None
 
         self._break_limit = break_limit
 
+        self._num_results = 0
+
+        self._unique_depths = set()
+
         self._init_schedule()
+        
 
     
     def _calc_bounding_score_contrib(self, next_lt: LecTut, next_slot: LecTutSlot) -> float:
@@ -152,7 +157,7 @@ class AndTreeSearch:
         for pair in self._input_data.pair:
             item_1 = self._curr_schedule[pair.id1]
             item_2 = self._curr_schedule[pair.id2]
-            if item_1.slot.day != item_2.slot.day and item_1.slot.time != item_2.slot.time:
+            if _day_overlap(item_1.lt, item_1.slot.day, item_2.lt, item_2.slot.day) and item_1.slot.time != item_2.slot.time:
                 pair_pen += self._input_data.pen_not_paired
 
         return self._curr_bounding_score + lec_min_pen + tut_min_pen + pair_pen
@@ -241,7 +246,7 @@ class AndTreeSearch:
                     break
 
         if not chosen_lectut:
-            for lt_bucket in (self._evening_lectures, self._5XX_lectures, self._other_lectures, self._tutorials):
+            for lt_bucket in (self._evening_lectures, self._5XX_lectures, self._tutorials, self._other_lectures):
                 if lt_bucket:
                     _, chosen_lectut = lt_bucket.popitem(last=False)
                     break
@@ -349,20 +354,20 @@ class AndTreeSearch:
         self._curr_bounding_score -= scheduled_item.b_score_contribution
 
     def _dfs(self, current_leaf: Node):
-        if self._break_limit and len(self._results) >= self._break_limit:
+        if self._break_limit and self._num_results >= self._break_limit:
             return
         
         expansions = self._get_expansions(current_leaf)
-
+        print(len(self._curr_schedule), end='\r')
         if not expansions:
             self.num_leafs += 1 # for observability
             # >= to account for the creation of 851/913
             if len(self._curr_schedule) == self._NUM_TUT + self._NUM_LEC:
                 res = self._curr_schedule.copy()
-                self._results.append(res)
                 if (ev := self._get_eval_score()) < self._min_eval:
                     self.ans = res
                     self._min_eval = ev
+                    self._num_results += 1
             return
         
         for next_item in expansions:
@@ -384,6 +389,6 @@ class AndTreeSearch:
         root = Node(DummyScheduledItem())
         self._dfs(root)
 
-        return self._results, self.ans
+        return [], self.ans
     
 
