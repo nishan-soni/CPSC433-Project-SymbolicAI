@@ -1,0 +1,7 @@
+Lecture slots:
+MO, 8:00, 5, 0, 3
+
+Lectures:
+CPSC 251 LEC 01,false
+CPSC 251 LEC 02,false
+CPSC 251 LEC 03,false

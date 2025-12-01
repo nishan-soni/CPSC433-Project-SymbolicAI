@@ -1,0 +1,4 @@
+Eval-value: 3
+CPSC 251 LEC 01   : MO, 8:00
+CPSC 251 LEC 02   : MO, 8:00
+CPSC 251 LEC 03   : MO, 8:00
