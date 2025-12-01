@@ -1,0 +1,13 @@
+Lecture slots:
+MO, 8:00, 1, 0,0
+
+Tutorial slots:
+MO, 12:00, 1, 1,0
+
+
+Lectures:
+CPSC 231 LEC 01,false
+
+Tutorials:
+CPSC 231 LEC 01 TUT 01,false
+CPSC 231 LEC 01 TUT 02,false

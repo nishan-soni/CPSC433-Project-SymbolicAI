@@ -3,4 +3,4 @@ TU, 11:00, 2, 0,0
 
 
 Lectures:
-CPSC 231 LEC 9, false
+CPSC 231 LEC 01, false

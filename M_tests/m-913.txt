@@ -2,14 +2,14 @@ Lecture slots:
 MO, 8:00, 5, 0, 3
 
 Tutorial slots:
-TU, 18:00, 5, 0, 3
+TU, 18:00, 2, 0, 0
 
 Lectures:
 CPSC 413 LEC 01,false
 
 
 Tutorials:
-
+CPSC 581 LEC 9 TUT 91, false
 
 Not compatible:
 

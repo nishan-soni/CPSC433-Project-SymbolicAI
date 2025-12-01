@@ -86,6 +86,9 @@ class AndTreeSearch:
     def __init__(self, input_data: InputData, break_limit: Optional[int] = None) -> None:
         self._input_data = input_data
 
+        self._NUM_TUT = len(self._input_data.lectures)
+        self._NUM_LEC = len(self._input_data.tutorials)
+
         self._open_lecture_slots = {item.identifier: item for item in self._input_data.lec_slots}
         self._open_tut_slots = {item.identifier: item for item in self._input_data.tut_slots}
 
@@ -277,6 +280,7 @@ class AndTreeSearch:
             if lec.course_id == "CPSC 351":
                 self._tutorials[id_851] = Tutorial(id_851, False)
                 self._input_data.part_assign[id_851] = PartialAssignment(id_851, "TU", "18:00")
+                self._NUM_TUT += 1
                 for lt in self._input_data.lectures + self._input_data.tutorials:
                     if lt.course_id == "CPSC 351":
                         self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_851))
@@ -284,6 +288,7 @@ class AndTreeSearch:
             if lec.course_id == "CPSC 413":
                 self._tutorials[id_913] = Tutorial(id_913, False)
                 self._input_data.part_assign[id_913] = PartialAssignment(id_913, "TU", "18:00")
+                self._NUM_TUT += 1
                 for lt in self._input_data.lectures + self._input_data.tutorials:
                     if lt.course_id == "CPSC 413":
                         self._input_data.not_compatible.append(NotCompatible(lt.identifier, id_913))
@@ -352,7 +357,7 @@ class AndTreeSearch:
         if not expansions:
             self.num_leafs += 1 # for observability
             # >= to account for the creation of 851/913
-            if len(self._curr_schedule) >= len(self._input_data.lectures) + len(self._input_data.tutorials):
+            if len(self._curr_schedule) == self._NUM_TUT + self._NUM_LEC:
                 res = self._curr_schedule.copy()
                 self._results.append(res)
                 if (ev := self._get_eval_score()) < self._min_eval:
