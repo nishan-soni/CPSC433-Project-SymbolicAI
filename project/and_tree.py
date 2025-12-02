@@ -1,10 +1,11 @@
 from __future__ import annotations
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
-import sys
+import random
 from typing import Dict, List, Mapping, Optional, Sequence, Union
 from project.models import LecTut, Lecture, LectureSlot, NotCompatible, PartialAssignment, Tutorial, TutorialSlot, LecTutSlot, is_tut, is_lec
 from project.parser import InputData
+
 
 @dataclass(frozen=True, slots=True)
 class ScheduledItem:
@@ -84,8 +85,12 @@ def _get_formatted_schedule(sched: Mapping[str, ScheduledItem]) -> str:
 
 class AndTreeSearch:
 
-    def __init__(self, input_data: InputData, break_limit: Optional[int] = None) -> None:
+    def __init__(self, input_data: InputData, break_limit: Optional[int] = None, shuffle = False) -> None:
         self._input_data = input_data
+
+        if shuffle:
+            random.shuffle(self._input_data.tutorials)
+            random.shuffle(self._input_data.lectures)
 
         self._NUM_LEC = len(self._input_data.lectures)
         self._NUM_TUT = len(self._input_data.tutorials)
