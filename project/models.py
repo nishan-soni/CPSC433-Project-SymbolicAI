@@ -22,6 +22,7 @@ def _calc_start_end_times(time_str: str, day: str, identifier: str):
 
     return start_time, end_time
 
+
 @dataclass(slots=True)
 class BaseSlot(CSVParsable):
     day: str
@@ -37,16 +38,22 @@ class BaseSlot(CSVParsable):
     identifier_suffix = ""
 
     def __post_init__(self) -> None:
-        self.start_time, self.end_time, =_calc_start_end_times(self.time, self.day, self.identifier_suffix)
+        (
+            self.start_time,
+            self.end_time,
+        ) = _calc_start_end_times(self.time, self.day, self.identifier_suffix)
         self.identifier = f"{self.day}{self.time}{self.identifier_suffix}"
+
 
 @dataclass(slots=True)
 class LectureSlot(BaseSlot):
     identifier_suffix = "LEC"
 
+
 @dataclass(slots=True)
 class TutorialSlot(BaseSlot):
     identifier_suffix = "TUT"
+
 
 @dataclass(slots=True)
 class LecTut(CSVParsable):
@@ -55,11 +62,12 @@ class LecTut(CSVParsable):
     level: int = field(default=0, init=False)
     is_evening: bool = field(default=False, init=False)
     course_id: str = field(default="", init=False)
-    
+
     def __post_init__(self) -> None:
         id_split = self.identifier.split(" ")
         self.level = int(id_split[1][0])
         self.course_id = " ".join(id_split[:2])
+
 
 @dataclass(slots=True)
 class Lecture(LecTut):
@@ -68,9 +76,11 @@ class Lecture(LecTut):
         id_split = self.identifier.split(" ")
         self.is_evening = id_split[3].startswith("9")
 
+
 @dataclass(slots=True)
 class Tutorial(LecTut):
     parent_lecture_id: str = field(default="", init=False)
+
     def __post_init__(self) -> None:
         LecTut.__post_init__(self)
         id_split = self.identifier.split(" ")
@@ -88,6 +98,7 @@ class NotCompatible(CSVParsable):
     id1: str
     id2: str
 
+
 @dataclass(slots=True)
 class Unwanted(CSVParsable):
     identifier: str
@@ -97,7 +108,10 @@ class Unwanted(CSVParsable):
     end_time: float = field(init=False)
 
     def __post_init__(self) -> None:
-        self.start_time, self.end_time, =_calc_start_end_times(self.time, self.day, self.identifier)
+        (
+            self.start_time,
+            self.end_time,
+        ) = _calc_start_end_times(self.time, self.day, self.identifier)
 
 
 @dataclass(slots=True)
@@ -110,7 +124,10 @@ class Preference(CSVParsable):
     end_time: float = field(init=False)
 
     def __post_init__(self) -> None:
-        self.start_time, self.end_time, =_calc_start_end_times(self.time, self.day, self.identifier)
+        (
+            self.start_time,
+            self.end_time,
+        ) = _calc_start_end_times(self.time, self.day, self.identifier)
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,15 +142,18 @@ class PartialAssignment(CSVParsable):
     day: str
     time: str
 
+
 @dataclass
 class Name(CSVParsable):
     name: str
+
 
 LecTutSlot = Union[LectureSlot, TutorialSlot]
 
 
 def is_tut(obj: "LecTut") -> TypeGuard["Tutorial"]:
     return isinstance(obj, Tutorial)
+
 
 def is_lec(obj: "LecTut") -> TypeGuard["Lecture"]:
     return isinstance(obj, Lecture)

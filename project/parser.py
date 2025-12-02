@@ -4,7 +4,19 @@ from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional
 import logging
 
-from project.models import LectureSlot, Name, TutorialSlot, Tutorial, Lecture, NotCompatible, Unwanted, Preference, Pair, PartialAssignment, LecTut
+from project.models import (
+    LectureSlot,
+    Name,
+    TutorialSlot,
+    Tutorial,
+    Lecture,
+    NotCompatible,
+    Unwanted,
+    Preference,
+    Pair,
+    PartialAssignment,
+    LecTut,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +37,7 @@ class InputData:
     pen_tut_min: int
     pen_not_paired: int
     pen_section: int
+
 
 @dataclass
 class ParsedFile:
@@ -53,6 +66,7 @@ headers = {
     "Name:": ("name", Name),
 }
 
+
 def _parse_file(path: str | Path):
     parsed = ParsedFile()
 
@@ -69,18 +83,26 @@ def _parse_file(path: str | Path):
 
                 current_attr, current_cls = headers[header_name]
                 continue
-            
+
             assert current_cls
             assert current_attr
             entry = current_cls.from_csv(line)
             getattr(parsed, current_attr).append(entry)
 
     return parsed
-            
 
 
-
-def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str, w_sec_diff: str, pen_lec_min: str, pen_tut_min: str, pen_not_paired: str, pen_section: str) -> InputData:
+def get_input_data(
+    path: str | Path,
+    w_min_filled: str,
+    w_pref: str,
+    w_pair: str,
+    w_sec_diff: str,
+    pen_lec_min: str,
+    pen_tut_min: str,
+    pen_not_paired: str,
+    pen_section: str,
+) -> InputData:
     """Get all the inputted data and raise exceptions on invalid inputs"""
     parsed_file = _parse_file(path)
 
@@ -111,8 +133,8 @@ def get_input_data(path: str | Path, w_min_filled: str, w_pref: str, w_pair: str
         preferences=preferences,
         pair=parsed_file.pair,
         part_assign=part_assign,
-        pen_lec_min=int(pen_lec_min)*int(w_min_filled),
-        pen_not_paired=int(pen_not_paired)*int(w_pair),
-        pen_tut_min=int(pen_tut_min)*int(w_min_filled),
-        pen_section=int(pen_section)*int(w_sec_diff)
+        pen_lec_min=int(pen_lec_min) * int(w_min_filled),
+        pen_not_paired=int(pen_not_paired) * int(w_pair),
+        pen_tut_min=int(pen_tut_min) * int(w_min_filled),
+        pen_section=int(pen_section) * int(w_sec_diff),
     )
