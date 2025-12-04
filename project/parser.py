@@ -1,8 +1,7 @@
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional
-import logging
+from typing import Dict, List
 
 from project.models import (
     LectureSlot,
@@ -15,10 +14,7 @@ from project.models import (
     Preference,
     Pair,
     PartialAssignment,
-    LecTut,
 )
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

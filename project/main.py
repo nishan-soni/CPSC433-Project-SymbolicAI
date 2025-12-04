@@ -1,11 +1,10 @@
 import sys
-from time import perf_counter
 from project.parser import get_input_data
 from project.and_tree import AndTreeSearch
-import tracemalloc
 import random
 
 SHAQ = 32
+random.seed(SHAQ)
 
 
 def main():
@@ -23,7 +22,6 @@ def main():
     shuffle = False
     if len(sys.argv) > 10:
         break_limit = 1
-        random.seed(SHAQ)
         shuffle = True
     else:
         break_limit = None

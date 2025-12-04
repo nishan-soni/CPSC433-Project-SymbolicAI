@@ -1,11 +1,10 @@
-from dataclasses import dataclass
-from typing import NamedTuple, get_type_hints, Type, TypeVar
+from typing import get_type_hints, Type, TypeVar
 
 T = TypeVar("T", bound="CSVParsable")
 
 
 class CSVParsable:
-
+    """Helper class to parse comma seperated inputs"""
     @classmethod
     def from_csv(cls: Type[T], line: str) -> T:
         parts = [p.strip() for p in line.split(",")]

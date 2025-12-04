@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TypeGuard, Union
 from project.csv_parsable import CSVParsable

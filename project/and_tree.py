@@ -2,21 +2,22 @@ from __future__ import annotations
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
 import random
-from typing import Dict, List, Mapping, Optional, Sequence, Union
+from typing import Dict, List, Mapping, Optional
 from project.models import (
     LecTut,
-    Lecture,
     LectureSlot,
     NotCompatible,
     PartialAssignment,
     Tutorial,
-    TutorialSlot,
     LecTutSlot,
     is_tut,
     is_lec,
 )
 from project.parser import InputData
 
+
+EVENING_TIME = 18
+LEVEL_5XX = 5
 
 @dataclass(frozen=True, slots=True)
 class ScheduledItem:
@@ -38,7 +39,7 @@ class DummyScheduledItem(ScheduledItem):
     start_time: float = 0.0
     end_time: float = 0.0
     day: str = ""
-    slot: Optional[LecTutSlot] = None
+    slot: LecTutSlot = LectureSlot("MO", "10:00", 0, 0, 0)
     cap_at_assign: int = 0
     b_score_contribution: float = 0
 
@@ -48,11 +49,8 @@ class Node:
     most_recent_item: ScheduledItem = field(default_factory=DummyScheduledItem)
 
 
-EVENING_TIME = 18
-LEVEL_5XX = 5
-
-
 def _day_overlap(lt1: LecTut, day1: str, lt2: LecTut, day2: str) -> bool:
+    """Returns True if the scheduling of two lectures day's overlap"""
     if day1 == day2:
         return True
 
@@ -66,11 +64,12 @@ def _day_overlap(lt1: LecTut, day1: str, lt2: LecTut, day2: str) -> bool:
 
 
 def _overlap(start1: float, end1: float, start2: float, end2: float) -> bool:
+    """Return True if two times overlap"""
     return not ((end1 <= start2) or (end2 <= start1))
 
 
 def _get_formatted_schedule(sched: Mapping[str, ScheduledItem]) -> str:
-    """Order lectures alphabetically, and put tutorials under their lecture"""
+    """Creates a formatted output of the schedule"""
 
     lectures = sorted(
         [item for item in sched.values() if is_lec(item.lt)],
@@ -138,15 +137,11 @@ class AndTreeSearch:
 
         self._min_eval = float("inf")
 
-        self.num_leafs = 0  # for observability
-
         self.ans: Optional[Dict[str, ScheduledItem]] = None
 
         self._break_limit = break_limit
 
         self._num_results = 0
-
-        self._unique_depths = set()
 
         self._init_schedule()
 
@@ -158,15 +153,13 @@ class AndTreeSearch:
     def _calc_bounding_score_contrib(
         self, next_lt: LecTut, next_slot: LecTutSlot
     ) -> float:
-        # Preference penalty
+        """Calculates the bounding score change that occurs if we add a lecture or tutorial to the schedule"""
         pref_pen = 0
 
         if (ident := next_lt.identifier) in self._input_data.preferences:
             for pref in self._input_data.preferences[ident]:
                 if pref.day != next_slot.day or pref.start_time != next_slot.start_time:
                     pref_pen += pref.pref_val
-
-        # Section penalty
 
         section_pen = 0
         if not is_lec(next_lt):
@@ -186,7 +179,7 @@ class AndTreeSearch:
         return b_score
 
     def _get_eval_score(self):
-        """This can most likley be optimized"""
+        """Gets the eval score of the current schedule"""
 
         tut_min_pen = 0
         lec_min_pen = 0
@@ -220,6 +213,7 @@ class AndTreeSearch:
         next_lt: LecTut,
         next_slot: LecTutSlot,
     ) -> bool:
+        """Check if adding the lecture/tutorial in the given slot fails hard constraints"""
 
         # Handle evening constraint
         if next_lt.is_evening and next_slot.start_time < EVENING_TIME:
@@ -311,8 +305,7 @@ class AndTreeSearch:
         return False
 
     def _get_expansions(self, leaf: Node) -> List[ScheduledItem]:
-        """
-        Expansion ordering
+        """Gets the expansions of a leaf in the And-tree search. The expansion ordering is as follows:
 
         If most recent assignment is a lecture:
             - Assign its tutorial
@@ -323,10 +316,9 @@ class AndTreeSearch:
         - Assign in this priority:
             - An Evening Lecture
             - A 5XX Lecture
-            - Other lecture
             - Other tutorial
+            - Other lecture
         """
-
         chosen_lectut = None
 
         if (ident := leaf.most_recent_item.lt.identifier) in self._successors:
@@ -361,6 +353,7 @@ class AndTreeSearch:
         open_slots = (
             self._open_lecture_slots if is_lec(chosen_lectut) else self._open_tut_slots
         )
+
         expansions = []
         for _, os in open_slots.items():
             if self._fail_hc(self._curr_schedule, chosen_lectut, os):
@@ -374,6 +367,8 @@ class AndTreeSearch:
         return sorted(expansions, key=lambda x: x.b_score_contribution)
 
     def _init_schedule(self):
+        """Initialize the schedule with the projects edge cases and partial assignments"""
+
         # remove Tuesday @ 11-12:30 from slots
         self._open_lecture_slots = {
             k: v
@@ -388,8 +383,6 @@ class AndTreeSearch:
         self._tutorials = OrderedDict(
             {item.identifier: item for item in self._input_data.tutorials}
         )
-
-        # partial assignments
 
         # Add partial assignments for 851 TUT and 913 TUT to TU 18:00 if 351 or 413 exist
         id_851 = "CPSC 851 TUT 01"
@@ -519,8 +512,6 @@ class AndTreeSearch:
         expansions = self._get_expansions(current_leaf)
         print(len(self._curr_schedule), end="\r")
         if not expansions:
-            self.num_leafs += 1  # for observability
-            # >= to account for the creation of 851/913
             if len(self._curr_schedule) == self._NUM_TUT + self._NUM_LEC:
                 res = self._curr_schedule.copy()
                 if (ev := self._get_eval_score()) < self._min_eval:
@@ -548,4 +539,4 @@ class AndTreeSearch:
         root = Node(DummyScheduledItem())
         self._dfs(root)
 
-        return [], self.ans
+        return self.ans
