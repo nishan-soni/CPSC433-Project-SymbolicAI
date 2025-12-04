@@ -11,6 +11,10 @@ python -m project.main input.txt 1 1 1 1 1 1 1 1 True
 
 ### Run tests
 ```
+# create a venv
+python -m venv .venv
+source .venv/bin/activate
+# install deps
 pip install -r requirements-dev.txt
 ```
 
