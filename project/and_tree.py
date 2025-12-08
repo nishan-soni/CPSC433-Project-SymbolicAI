@@ -39,7 +39,7 @@ class DummyScheduledItem(ScheduledItem):
     start_time: float = 0.0
     end_time: float = 0.0
     day: str = ""
-    slot: LecTutSlot = LectureSlot("MO", "10:00", 0, 0, 0)
+    slot: Optional[LecTutSlot] = None
     cap_at_assign: int = 0
     b_score_contribution: float = 0
 
